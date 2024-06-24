@@ -1,199 +1,191 @@
-document.addEventListener('DOMContentLoaded', function() {
-  const workHoursContainer = document.querySelector('.work-hours');
-  const workHoursHighlight = document.querySelector('.highlight');
-  const regularShiftStartInput = document.getElementById('regular-start');
-  const regularShiftEndInput = document.getElementById('regular-end');
-  const scheduleForm = document.getElementById('schedule-form');
-  const maxWorkHours = 18.5;
-  let firstShiftStart = null; // Track the start time of the first shift entered
-  let currentStartDate = null; // Track the start date of the current 24-hour period
+const regularShiftStartInput = document.getElementById('regular-start');
+const regularShiftEndInput = document.getElementById('regular-end');
+const complianceHoursInput = document.getElementById('compliance-hours');
+const changeHeaderBtn = document.getElementById('change-header-btn');
+const addShiftBtn = document.getElementById('add-entry');
+const removeEntryButton = document.getElementById('remove-entry');
+const savePDFButton = document.getElementById('save-pdf');
+const slider = document.getElementById('col-slider');
+const sliderValue = document.getElementById('slider-value');
 
-  // Function to update work hours based on user input
-  function updateWorkHours() {
-    let totalWorkHours = 0;
-    let shiftCount = 0;
-    let consecutiveWarning = false;
+let totalHoures=0;
 
-    // Regular Shift Hours
-    const regularStartTime = parseTime(regularShiftStartInput.value);
-    const regularEndTime = parseTime(regularShiftEndInput.value);
 
-    // Loop through each day's shift entry (1 to 31)
-    for (let day = 1; day <= 31; day++) {
-      const shiftEntry = document.getElementById(`shift-entry-${day}`);
 
-      if (!shiftEntry) continue; // Skip if shift entry does not exist
+complianceHoursInput.addEventListener('change',function () {
+  check();
+});
 
-      const shiftInput = shiftEntry.querySelector('.shift');
-      const offShiftCheckbox = shiftEntry.querySelector('.off-shift');
-      const regShiftCheckbox = shiftEntry.querySelector('.reg-shift');
-      const startTimeInput = shiftEntry.querySelector('.start-time');
-      const endTimeInput = shiftEntry.querySelector('.end-time');
-      const totalHoursSpan = shiftEntry.querySelector('.total-hours');
-
-      const shiftLabel = shiftInput.value.trim();
-      const isOffShift = offShiftCheckbox.checked;
-      const isRegShift = regShiftCheckbox.checked;
-      let startTime = parseTime(startTimeInput.value);
-      let endTime = parseTime(endTimeInput.value);
-
-      // Handle Regular Shift auto-fill
-      if (isRegShift && regularStartTime !== null && regularEndTime !== null) {
-        startTime = regularStartTime;
-        endTime = regularEndTime;
-        startTimeInput.value = formatTime(startTime);
-        endTimeInput.value = formatTime(endTime);
-      }
-
-      // Determine if the shift is within the current 24-hour period
-      if (firstShiftStart === null) {
-        firstShiftStart = startTime;
-        currentStartDate = new Date(); // Set current start date to today initially
-      }
-
-      if (startTime !== null && endTime !== null && !isOffShift) {
-        // Calculate work hours for the shift
-        let workHours = calculateWorkHours(startTime, endTime);
-
-        // Adjust start time if it's after midnight but before the end of the current 24-hour period
-        if (startTime < firstShiftStart && startTime < endTime && shiftCount > 0) {
-          startTime += 24;
-        }
-
-        // Check if the shift is within the current 24-hour period
-        if (currentStartDate && startTime >= firstShiftStart) {
-          // Update total work hours within the 24-hour period
-          totalWorkHours += workHours;
-          shiftCount++;
-
-          // Display total hours worked for the shift
-          totalHoursSpan.textContent = `${workHours.toFixed(2)} hrs`;
-
-          // Check for consecutive shifts exceeding 18.5 hours
-          if (shiftCount > 1 && totalWorkHours > maxWorkHours) {
-            consecutiveWarning = true;
-          }
-
-          // Update current start date if shift ends past midnight
-          if (endTime > 24) {
-            currentStartDate.setDate(currentStartDate.getDate() + 1);
-          }
-        } else {
-          // Reset total hours display if outside the current 24-hour period
-          totalHoursSpan.textContent = '';
-        }
-      } else {
-        // Reset total hours display and clear any warnings for off-shift entries
-        totalHoursSpan.textContent = '';
-      }
-
-      // Highlight shifts in red if they exceed 18.5 hours in any 24-hour period
-      if (totalWorkHours > maxWorkHours && !isOffShift) {
-        shiftEntry.classList.add('exceeds-limit');
-      } else {
-        shiftEntry.classList.remove('exceeds-limit');
-      }
-
-      // Highlight shifts as dark grey if marked as off shift
-      if (isOffShift) {
-        shiftEntry.classList.add('off-shift-marked');
-      } else {
-        shiftEntry.classList.remove('off-shift-marked');
-      }
+slider.addEventListener('input', function() {
+  sliderValue.textContent = this.value-1;
+  totalHoures=0;
+  let num=this.value;
+  let i=1;
+  const spans = document.querySelectorAll('.work-houres');
+  spans.forEach(span => {
+    if (i>=num) {
+      return;
     }
+    i++;
 
-    // Update work hours highlight
-    const highlightWidth = (totalWorkHours / 24) * 100; // Percentage of total 24-hour period
-    workHoursHighlight.style.width = `${highlightWidth}%`;
-
-    // Check for consecutive shifts warning
-    if (consecutiveWarning) {
-      alert('Warning: Consecutive shifts exceed 18.5 hours in any 24-hour period.');
+    let innerText=span.innerText;
+    if (innerText!='') {
+        let number = parseFloat(innerText.match(/[\d.]+/)[0]);
+        totalHoures += Number(number);
+        
+        if(totalHoures<=0){
+            document.querySelector(".total-houres").innerHTML=  "";
+        }else{
+            document.querySelector(".total-houres").innerHTML=  `${totalHoures.toFixed(1)} hrs`;
+        }
     }
+  });
+
+ check();
+
+});
+
+function check(){
+  if (totalHoures > complianceHoursInput.value) {
+    slider.style.accentColor = 'red';
+  } else {
+    slider.style.accentColor = 'green';
   }
+}
 
-  // Function to parse time input and convert to decimal hours
-  function parseTime(timeString) {
-    const parts = timeString.split(':');
-    if (parts.length !== 2) return null;
+//changing header
+changeHeaderBtn.addEventListener('click', function() {
+  const headerTitleInput = document.getElementById('header-title-input');
+  document.getElementById('header-title').innerText = headerTitleInput.value;
+});
 
-    const hours = parseInt(parts[0], 10);
-    const minutes = parseInt(parts[1], 10);
+addShiftBtn.addEventListener('click', addShiftEntry);
 
-    if (isNaN(hours) || isNaN(minutes)) return null;
+removeEntryButton.addEventListener('click',  removeShiftEntry);
 
-    return hours + (minutes / 60);
-  }
+savePDFButton.addEventListener('click', function() {
+  const element = document.querySelector('.schedule');
+          html2pdf()
+              .from(element)
+              .save();
+});
 
-  // Function to format decimal hours as hh:mm
-  function formatTime(decimalHours) {
-    const hours = Math.floor(decimalHours);
-    const minutes = Math.round((decimalHours - hours) * 60);
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-  }
 
-  // Function to calculate work hours between start and end times
-  function calculateWorkHours(startTime, endTime) {
-    let workHours = endTime - startTime;
-    if (workHours < 0) workHours += 24; // Handle overnight shifts
-
-    return workHours;
-  }
-
-  // Function to dynamically generate input fields for each day from 1 to 31
-  function generateShiftEntries() {
-    const shiftEntriesContainer = document.querySelector('.shift-entries');
-
-    for (let day = 1; day <= 31; day++) {
-      const shiftEntry = document.createElement('div');
-      shiftEntry.id = `shift-entry-${day}`;
-      shiftEntry.classList.add('shift-entry');
-      shiftEntry.innerHTML = `
+function addShiftEntry() {
+  const day = document.querySelectorAll('.shift-entry').length + 1;
+  //to append child
+  const shiftEntriesContainer = document.querySelector('.shift-entries');
+  const shiftEntry = document.createElement('div');
+    shiftEntry.id = `shift-entry-${day}`;
+    shiftEntry.classList.add('shift-entry');
+    shiftEntry.innerHTML = `
         <label for="shift-${day}">Shift:</label>
-        <input type="text" id="shift-${day}" class="shift" maxlength="15">
-
+        <input type="text" id="shift-${day}" class="shift" maxlength="50">
         <label for="off-shift-${day}">Off Shift:</label>
         <input type="checkbox" id="off-shift-${day}" class="off-shift">
-
         <label for="reg-shift-${day}">Reg Shift:</label>
         <input type="checkbox" id="reg-shift-${day}" class="reg-shift">
-
         <label for="start-time-${day}">Start Time:</label>
-        <input type="time" id="start-time-${day}" class="start-time" value="07:30">
-
+        <input type="time" id="start-time-${day}" class="start-time" value="${regularShiftStartInput.value}">
         <label for="end-time-${day}">End Time:</label>
-        <input type="time" id="end-time-${day}" class="end-time" value="17:00">
+        <input type="time" id="end-time-${day}" class="end-time" value="${regularShiftEndInput.value}">
+        <span class="work-houres-${day} work-houres"></span>
+    `;
+    shiftEntriesContainer.appendChild(shiftEntry);
 
-        <span class="total-hours"></span>
-      `;
-      shiftEntriesContainer.appendChild(shiftEntry);
+
+    const isRegShift = shiftEntry.querySelector(`.reg-shift`);
+    const isOffShift = shiftEntry.querySelector('.off-shift');
+
+    // //selecting start and end time 
+    const startTimeInput = shiftEntry.querySelector(`#start-time-${day}`);
+    const endTimeInput = shiftEntry.querySelector(`#end-time-${day}`);
+  
+    function changeSpan(){
+          let startTime = parseTime(startTimeInput.value);
+          let endTime = parseTime(endTimeInput.value);
+          let workHours = calculateWorkHours(startTime, endTime);
+          shiftEntry.querySelector(`.work-houres-${day}`).innerText = workHours+ ' hrs';
     }
-  }
 
-  // Call function to generate shift entries on page load
-  generateShiftEntries();
 
-  // Attach event listeners
-  const updateButton = document.getElementById('update-schedule');
-  updateButton.addEventListener('click', function() {
-    updateWorkHours();
-  });
-
-  const regShiftCheckboxes = document.querySelectorAll('.reg-shift');
-  regShiftCheckboxes.forEach(function(checkbox) {
-    checkbox.addEventListener('change', function() {
-      const shiftEntry = checkbox.closest('.shift-entry');
-      const startTimeInput = shiftEntry.querySelector('.start-time');
-      const endTimeInput = shiftEntry.querySelector('.end-time');
-      const isRegShift = checkbox.checked;
-
-      if (isRegShift) {
-        startTimeInput.value = regularShiftStartInput.value;
-        endTimeInput.value = regularShiftEndInput.value;
-      } else {
-        startTimeInput.value = '07:30';
-        endTimeInput.value = '17:00';
-      }
+    startTimeInput.addEventListener('input', function(){
+      changeSpan();
+      
     });
-  });
-});
+
+    endTimeInput.addEventListener('input', function(){
+      changeSpan()
+
+    });
+
+    isRegShift.addEventListener("change", function() {
+      changeSpan()
+
+    });
+
+    isOffShift.addEventListener('change', function() {
+     
+        if (isOffShift.checked) {
+            startTimeInput.disabled = true;
+            endTimeInput.disabled = true;
+            startTimeInput.value = '';
+            endTimeInput.value = '';
+    //       //if work hour span is not empty make it empty 
+          let span=isOffShift.parentNode.querySelector("span");
+          let spanText= span.innerText;
+          if (spanText!='') {
+              let number = parseFloat(spanText.match(/[\d.]+/)[0]);
+
+              if (day<slider.value) {
+                totalHoures-=number;
+              }
+              document.querySelector(".total-houres").innerHTML=  `${totalHoures.toFixed(1)} Hrs`;
+          }
+          span.innerText='';
+
+        } else {
+            startTimeInput.disabled = false;
+            endTimeInput.disabled = false;
+            startTimeInput.value = regularShiftStartInput.value;
+            endTimeInput.value = regularShiftEndInput.value;
+        }
+
+      
+      if(totalHoures<=0){
+          document.querySelector(".total-houres").innerHTML=  "";
+      }
+
+    });
+}
+
+
+function removeShiftEntry() {
+  const shiftEntriesContainer = document.querySelector('.shift-entries');
+  const lastEntry = shiftEntriesContainer.lastElementChild;
+  if (lastEntry) {
+      let spanText =shiftEntriesContainer.lastChild.querySelector("span").innerText;
+      shiftEntriesContainer.removeChild(lastEntry);
+      let number = parseFloat(spanText.match(/[\d.]+/)[0]);
+
+      if (day<slider.value) {
+        totalHoures-=number;
+      }
+      document.querySelector(".total-houres").innerHTML=  `${totalHoures.toFixed(1)} Hrs`;
+
+  }   
+}
+
+function calculateWorkHours(startTime, endTime) {
+  const difference = Math.abs(endTime - startTime);
+  return difference.toFixed(2);
+}
+
+function parseTime(timeString) {
+  const parts = timeString.split(':');
+  if (parts.length !== 2) return null;
+  const hours = parseInt(parts[0], 10);
+  const minutes = parseInt(parts[1], 10);
+  if (isNaN(hours) || isNaN(minutes)) return null;
+  return hours + (minutes / 60);
+}

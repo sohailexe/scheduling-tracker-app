@@ -1,0 +1,110 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+}
+
+.schedule {
+  position: relative;
+  max-width: 980px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.shift-entry {
+  margin-bottom: 10px;
+}
+
+.shift-entry label {
+  margin-right: 10px;
+}
+
+.shift-entry.exceeds-limit {
+  background-color: #ffcccc; /* Light red for exceeded shifts */
+}
+
+.shift-entry.off-shift-marked {
+  background-color: #d9d9d9; /* Dark grey for off-shift entries */
+}
+.positioned-container{
+  position: absolute;
+  display: flex;
+  align-items: center;
+  top: 198px;
+  right: 10px;
+
+  width: 110px;
+  height: 135px;
+  
+}
+.positioned-container .bar{
+  width: 10px;
+  height: 100%;
+  /* border: 1px solid #ccc; */
+}
+.positioned-container .bar .highlight{
+  width: 100%;
+  height: 100%;
+}
+.positioned-container .total-houres{
+  margin: 5px;
+
+  font-weight: 800;
+}
+
+
+.vertical-slider {
+  /* Rotate the slider */
+  writing-mode: bt-lr; /* IE */
+  -webkit-appearance: slider-vertical; /* WebKit */
+  appearance: slider-vertical; /* Standard */
+  width: 20px; /* Set the width to adjust the size of the slider */
+  height: 200px; /* Set the height to adjust the size of the slider */
+  margin: 0; /* Remove default margin */
+  transform: rotate(180deg);
+
+  accent-color: green;
+}
+
+
+.slider-container {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+}
+
+#slider-value {
+  margin-left: 10px;
+  font-weight: bold;
+}
+
+
+button {
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.total-hours {
+  margin-left: 10px;
+  font-size: 0.9em;
+  color: #666;
+}
+.bg-gray{
+  background-color: #ccc;
+}
+
+
+@media print {
+  .schedule {
+    background: #000;
+    max-width: 100%;
+    box-shadow: none;
+  }
+
+  button {
+    display: none; /* Hide buttons when printing */
+  }
+}
