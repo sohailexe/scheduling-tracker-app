@@ -2,6 +2,52 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f0f0f0;
 }
+.selected_entries_input{
+  margin-left: 47px;
+}
+.select_entries{
+  background: #ecf1f9;
+  width: 150px;
+  display: inline-block;
+  margin-left: 134px;
+  align-content: center;
+}
+
+input[type=range][orient=vertical] {
+  writing-mode: vertical-lr;
+  direction: ltr;
+  appearance: slider-vertical;
+   height:100%;
+   -webkit-appearance: none;
+    background: #d3d3d3;
+    position: absolute;
+    right: 104px;
+}
+.total__hours{
+  position: absolute;
+  width: 101px;
+  right: 0px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  
+
+}
+.total__hour{
+  margin: 0;
+  font-weight: 800;
+
+}
+
+.input-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 23px;
+  background: #4CAF50;
+  cursor: pointer;
+  box-shadow: 0px 0px 5px #4CAF50;
+  /* transform: translateY(-50%); */
+}
 
 .schedule {
   position: relative;
@@ -13,12 +59,20 @@ body {
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.shift-entry {
+#schedule-form{
+  /* height: ; */
+  position: relative;
+  display: flex;
+}
+
+
+.shift-entrys{
   margin-bottom: 10px;
 }
 
-.shift-entry label {
-  margin-right: 10px;
+.off-shift, .reg-shift{
+  margin-right: 22px;
+  margin-left: -2px;
 }
 
 .shift-entry.exceeds-limit {
@@ -78,6 +132,7 @@ body {
 #slider-value {
   margin-left: 10px;
   font-weight: bold;
+  
 }
 
 
